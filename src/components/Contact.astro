@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, type Lang } from '../i18n/routes';
+import { site } from '../data/site';
+import { breadcrumbLd } from '../lib/seo';
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const c = t.contact;
+const crumbs = [{ name: t.crumbHome, path: sectionPath(lang, 'home') }, { name: t.nav.contact, path: sectionPath(lang, 'contact') }];
+const missing = !site.email && !site.phone && !site.whatsapp && !site.streetAddress;
+---
+<Base lang={lang} section="contact" title={c.metaTitle} description={c.metaDesc}
+  alt={{ ca: sectionPath('ca', 'contact'), es: sectionPath('es', 'contact') }}
+  jsonLd={[breadcrumbLd(Astro.site!.origin, crumbs)]}>
+  <Breadcrumbs items={crumbs} />
+  <section class="section"><div class="wrap narrow">
+    <h1>{c.h1}</h1>
+    <p class="lead">{c.intro}</p>
+    {import.meta.env.DEV && missing && <p class="note">{c.devNote}</p>}
+    <div class="card">
+      <h2>{c.where}</h2>
+      <ul class="contact-list">
+        <li><strong>{c.place}</strong></li>
+        {site.streetAddress && <li>{c.address}: {site.streetAddress}{site.postalCode ? `, ${site.postalCode}` : ''}</li>}
+        {site.mapUrl && <li><a href={site.mapUrl} rel="noopener">{c.map}</a></li>}
+        {site.email && <li>{c.email}: <a href={`mailto:${site.email}`}>{site.email}</a></li>}
+        {site.phone && <li>{c.phone}: <a href={`tel:${site.phone}`}>{site.phone}</a></li>}
+        {site.whatsapp && <li>{c.whatsapp}: <a href={`https://wa.me/${site.whatsapp}`} rel="noopener">+{site.whatsapp}</a></li>}
+        {site.instagram && <li>{c.instagram}: <a href={site.instagram} rel="noopener">{site.instagram.replace('https://www.instagram.com/', '@').replace(/\/$/, '')}</a></li>}
+      </ul>
+    </div>
+  </div></section>
+</Base>

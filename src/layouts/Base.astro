@@ -1,0 +1,92 @@
+---
+import '@fontsource-variable/bricolage-grotesque';
+import '@fontsource-variable/figtree';
+import '@fontsource/caveat/600.css';
+import '../styles/global.css';
+import { ui } from '../i18n/ui';
+import { sectionPath, otherLang, type Lang, type Section } from '../i18n/routes';
+import { site } from '../data/site';
+import Brand from '../components/Brand.astro';
+import { businessLd, websiteLd } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+  title: string; // título SEO completo, sin sufijo de marca
+  description: string;
+  section: Section;
+  alt: { ca: string; es: string }; // rutas equivalentes en cada idioma
+  jsonLd?: object[];
+  ogType?: 'website' | 'article';
+  noindex?: boolean;
+}
+const { lang, title, description, section, alt, jsonLd = [], ogType = 'website', noindex = false } = Astro.props;
+const t = ui[lang];
+const origin = Astro.site!.origin;
+const canonical = new URL(alt[lang], origin).href;
+// La marca solo se añade si el título resultante cabe en ~60 caracteres (Google trunca a partir de ahí).
+const withBrand = `${title} | ${t.siteName}`;
+const fullTitle = title.includes('Moviment Conscient') || withBrand.length > 60 ? title : withBrand;
+const other = otherLang(lang);
+const keys = ['home', 'activities', 'events', 'schedule', 'videos', 'app', 'blog', 'about', 'contact'] as const;
+const graph = [businessLd(origin, lang), websiteLd(origin, lang), ...jsonLd];
+---
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="ca" href={new URL(alt.ca, origin).href} />
+    <link rel="alternate" hreflang="es" href={new URL(alt.es, origin).href} />
+    <link rel="alternate" hreflang="x-default" href={new URL(alt.ca, origin).href} />
+    {noindex && <meta name="robots" content="noindex,follow" />}
+    <meta name="theme-color" content="#6f4fa8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={lang === 'ca' ? 'ca_ES' : 'es_ES'} />
+    <meta property="og:locale:alternate" content={lang === 'ca' ? 'es_ES' : 'ca_ES'} />
+    <meta name="twitter:card" content="summary" />
+    {graph.map((g) => <script type="application/ld+json" set:html={JSON.stringify(g)} />)}
+  </head>
+  <body>
+    <a class="skip" href="#main">{t.skip}</a>
+    <header class="header">
+      <div class="wrap">
+        <Brand href={sectionPath(lang, 'home')} />
+        <details class="menu" open>
+          <summary>{t.menu}</summary>
+          <nav class="nav" aria-label="Principal">
+            {keys.map((k) => <a href={sectionPath(lang, k)} aria-current={k === section ? 'page' : undefined}>{t.nav[k]}</a>)}
+            <a class="lang" href={alt[other]} hreflang={other} lang={other} title={ui[other].langName}>{other.toUpperCase()}</a>
+          </nav>
+        </details>
+        <script is:inline>(function(){var d=document.querySelector('.menu');if(!d)return;var m=matchMedia('(min-width: 1000px)');function f(){d.open=m.matches}f();m.addEventListener('change',f);})();</script>
+      </div>
+    </header>
+    <main id="main"><slot /></main>
+    <footer class="footer">
+      <div class="wrap footer-grid">
+        <div>
+          <Brand class="footer-brand" href={sectionPath(lang, 'home')} />
+          <p>{t.footer.tagline}</p>
+        </div>
+        <nav aria-label={t.footer.explore}>
+          <p class="footer-title">{t.footer.explore}</p>
+          <ul>{keys.map((k) => <li><a href={sectionPath(lang, k)}>{t.nav[k]}</a></li>)}</ul>
+        </nav>
+        <div>
+          <p class="footer-title">{t.footer.area}</p>
+          <p>{site.locality}, Baix Llobregat<br />{site.nearby.join(' · ')}</p>
+        </div>
+      </div>
+      <div class="wrap copy">© {new Date().getFullYear()} {t.siteName}. {t.footer.rights}.</div>
+    </footer>
+  </body>
+</html>

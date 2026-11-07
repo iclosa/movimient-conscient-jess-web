@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Faq from './Faq.astro';
+import Cta from './Cta.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, itemPath, type Lang } from '../i18n/routes';
+import { services } from '../data/services';
+import { breadcrumbLd, faqLd, serviceLd } from '../lib/seo';
+const { lang, id } = Astro.props as { lang: Lang; id: string };
+const t = ui[lang];
+const svc = services.find((s) => s.id === id)!;
+const x = svc.t[lang];
+const origin = Astro.site!.origin;
+const self = itemPath(lang, 'services', svc.slug[lang]);
+const crumbs = [
+  { name: t.crumbHome, path: sectionPath(lang, 'home') },
+  { name: t.nav.services, path: sectionPath(lang, 'services') },
+  { name: x.name, path: self },
+];
+---
+<Base lang={lang} section="services" title={x.metaTitle} description={x.metaDesc}
+  alt={{ ca: itemPath('ca', 'services', svc.slug.ca), es: itemPath('es', 'services', svc.slug.es) }}
+  jsonLd={[breadcrumbLd(origin, crumbs), serviceLd(origin, { name: x.h1, description: x.metaDesc, path: self }), faqLd(x.faq)]}>
+  <Breadcrumbs items={crumbs} />
+  <section class="page-hero"><div class="wrap narrow">
+    <h1>{x.h1}</h1><p class="lead">{x.intro}</p>
+    <div class="actions"><a class="btn" href={sectionPath(lang, 'contact')}>{t.cta.contact}</a></div>
+  </div></section>
+  <section class="section"><div class="wrap narrow prose">
+    {x.sections.map((s) => (
+      <>
+        <h2>{s.h2}</h2>
+        {s.p && <p>{s.p}</p>}
+        {s.list && <ul class="checks">{s.list.map((li) => <li>{li}</li>)}</ul>}
+      </>
+    ))}
+    <p class="disclaimer">{t.disclaimer}</p>
+  </div></section>
+  <Faq title={t.faqTitle} items={x.faq} />
+  <Cta lang={lang} />
+</Base>

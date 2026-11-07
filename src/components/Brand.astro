@@ -1,0 +1,22 @@
+---
+// Logo de Moviment Conscient by Jess: el mismo que el panel del backend
+// (círculo crema, columna de puntos turquesa y arcos morado/turquesa) con el nombre y la firma "by Jess".
+// TODO: sustituir el SVG por el archivo oficial cuando Jess lo facilite (también en el backend).
+interface Props { href?: string; class?: string }
+const { href, class: className } = Astro.props;
+const Tag = href ? 'a' : 'span';
+---
+<Tag class:list={['brand', className]} href={href}>
+  <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <circle cx="24" cy="24" r="23" fill="#FBF3DF" />
+    <g fill="#2BB5AE">
+      <circle cx="24" cy="10" r="1.7" />
+      <circle cx="24" cy="15.5" r="1.7" />
+      <circle cx="24" cy="21" r="1.7" />
+      <circle cx="24" cy="26.5" r="1.7" />
+    </g>
+    <path d="M9 28a15 15 0 0 0 30 0" fill="none" stroke="#6B4BA8" stroke-width="3" stroke-linecap="round" />
+    <path d="M14 33a10 10 0 0 0 20 0" fill="none" stroke="#2BB5AE" stroke-width="3" stroke-linecap="round" />
+  </svg>
+  <span class="brand-text"><b>Moviment Conscient</b> <small>by Jess</small></span>
+</Tag>

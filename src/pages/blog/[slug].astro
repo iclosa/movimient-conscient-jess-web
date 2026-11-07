@@ -1,0 +1,9 @@
+---
+import C from '../../components/Post.astro';
+import { loadPosts } from '../../lib/content';
+export async function getStaticPaths() {
+  return (await loadPosts()).map((x) => ({ params: { slug: x.translations.ca.slug }, props: { id: x.id } }));
+}
+const { id } = Astro.props;
+---
+<C lang="ca" id={id} />

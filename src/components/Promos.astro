@@ -1,0 +1,31 @@
+---
+import { ui } from '../i18n/ui';
+import { loadPromotions, safeUrl, fmtDay } from '../lib/content';
+import { actStyle } from '../data/activities';
+import type { Lang } from '../i18n/routes';
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang].promos;
+const promos = await loadPromotions();
+const style = (c: string | null) => (c && /^#[0-9a-f]{6}$/i.test(c) ? actStyle({ color: c, textColor: '#1c1b1f' } as any) : '');
+---
+{promos.length > 0 && (
+  <section class="section alt" id="promocions">
+    <div class="wrap">
+      <div class="section-head"><h2>{t.title}</h2><p>{t.intro}</p></div>
+      <div class="grid">
+        {promos.map((p) => {
+          const url = safeUrl(p.cta_url);
+          return (
+            <article class="card act" style={style(p.color)}>
+              <span class="dot"></span>
+              <h3>{p.title}</h3>
+              {p.body && <p>{p.body}</p>}
+              {p.ends_at && <p class="meta">{`${t.until} ${fmtDay(p.ends_at, lang)}`}</p>}
+              {url && <a class="more" href={url}>{p.cta_label || t.cta} →</a>}
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+)}

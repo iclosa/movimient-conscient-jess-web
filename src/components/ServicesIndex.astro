@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Cta from './Cta.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, itemPath, type Lang } from '../i18n/routes';
+import { services } from '../data/services';
+import { breadcrumbLd } from '../lib/seo';
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const s = t.services;
+const crumbs = [{ name: t.crumbHome, path: sectionPath(lang, 'home') }, { name: t.nav.services, path: sectionPath(lang, 'services') }];
+---
+<Base lang={lang} section="services" title={s.metaTitle} description={s.metaDesc}
+  alt={{ ca: sectionPath('ca', 'services'), es: sectionPath('es', 'services') }}
+  jsonLd={[breadcrumbLd(Astro.site!.origin, crumbs)]}>
+  <Breadcrumbs items={crumbs} />
+  <section class="page-hero"><div class="wrap"><h1>{s.h1}</h1><p class="lead">{s.intro}</p></div></section>
+  <section class="section"><div class="wrap"><div class="grid">
+    {services.map((x) => (
+      <article class="card">
+        <h2><a href={itemPath(lang, 'services', x.slug[lang])}>{x.t[lang].name}</a></h2>
+        <p>{x.t[lang].short}</p>
+        <span class="more" aria-hidden="true">{s.more} →</span>
+      </article>
+    ))}
+  </div></div></section>
+  <Cta lang={lang} />
+</Base>

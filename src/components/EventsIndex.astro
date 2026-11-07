@@ -1,0 +1,25 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import EventCards from './EventCards.astro';
+import Cta from './Cta.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, type Lang } from '../i18n/routes';
+import { loadEvents } from '../lib/content';
+import { breadcrumbLd } from '../lib/seo';
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const e = t.events;
+const events = await loadEvents();
+const crumbs = [{ name: t.crumbHome, path: sectionPath(lang, 'home') }, { name: t.nav.events, path: sectionPath(lang, 'events') }];
+---
+<Base lang={lang} section="events" title={e.metaTitle} description={e.metaDesc}
+  alt={{ ca: sectionPath('ca', 'events'), es: sectionPath('es', 'events') }}
+  jsonLd={[breadcrumbLd(Astro.site!.origin, crumbs)]}>
+  <Breadcrumbs items={crumbs} />
+  <section class="page-hero"><div class="wrap"><h1>{e.h1}</h1><p class="lead">{e.intro}</p></div></section>
+  <section class="section"><div class="wrap">
+    {events.length > 0 ? <EventCards lang={lang} events={events} /> : <p>{e.empty}</p>}
+  </div></section>
+  <Cta lang={lang} />
+</Base>

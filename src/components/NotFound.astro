@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, type Lang } from '../i18n/routes';
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+---
+<Base lang={lang} section="home" title={t.notFound.title} description={t.notFound.text} noindex
+  alt={{ ca: sectionPath('ca', 'home'), es: sectionPath('es', 'home') }}>
+  <section class="section"><div class="wrap narrow">
+    <h1>{t.notFound.title}</h1><p>{t.notFound.text}</p>
+    <p><a class="btn" href={sectionPath(lang, 'home')}>{t.notFound.back}</a></p>
+  </div></section>
+</Base>

@@ -1,0 +1,36 @@
+/* Tokens copiados de la guía de estilos (sistema de diseño "Moviment Conscient by Jess").
+   No editar a mano: cambiar primero la guía y volver a copiar. */
+:root {
+  color-scheme: light;
+  --surface-100: #FBF7EF; --surface-200: #FFFFFF; --surface-300: #F1E9DA; --line: #D9CDB8;
+  --ink: #231B2B; --ink-muted: #5E5468;
+  --violeta: #6A3593; --on-violeta: #FFFFFF;
+  --turquesa: #0E7685; --on-turquesa: #FFFFFF; --turquesa-logo: #2BA3B5;
+  --focus: var(--violeta);
+  --act-nidra: #0E7685; --act-hatha: #5A6A22; --act-vinyasa: #6A3593; --act-hit: #B0482A;
+  --act-acro: #9A5B14; --act-familiar: #B03A6F; --act-funcional: #0E6B52; --on-act: #FFFFFF;
+  --act-nidra-soft: #D6EEF1; --act-hatha-soft: #E6EBCB; --act-vinyasa-soft: #E6D8F3; --act-hit-soft: #F7DACF;
+  --act-acro-soft: #F5E2C4; --act-familiar-soft: #F8D9E6; --act-funcional-soft: #CFE9DF;
+  --estado-ok: #0B6E99; --estado-aviso: #8A5A00; --estado-error: #B3261E;
+  --shadow-card: 0 1px 2px rgba(35,27,43,0.06), 0 8px 20px rgba(35,27,43,0.08);
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px; --space-6: 32px; --space-8: 48px;
+  --radius-sm: 8px; --radius-md: 16px; --radius-lg: 24px; --radius-pill: 999px;
+  --font-display: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-sans: 'Figtree Variable', 'Figtree', system-ui, sans-serif;
+  --font-script: 'Caveat', cursive;
+}
+/* El web és sempre clar (calma). El tema fosc només s'activa amb data-theme="dark". */
+:root[data-theme="dark"] {
+    --surface-100: #17141C; --surface-200: #211D28; --surface-300: #2C2735; --line: #3A3444;
+    --ink: #F4EEF7; --ink-muted: #BDB3C6;
+    --violeta: #C9A3EA; --on-violeta: #1B1022;
+    --turquesa: #6CCBD8; --on-turquesa: #08262B;
+    --act-nidra: #5CC3D2; --act-hatha: #B5C760; --act-vinyasa: #C9A3EA; --act-hit: #F29A7A;
+    --act-acro: #E8B15F; --act-familiar: #EE9BBF; --act-funcional: #5FCDA8; --on-act: #17141C;
+    --act-nidra-soft: #1E3A40; --act-hatha-soft: #323B1A; --act-vinyasa-soft: #3A2A4B; --act-hit-soft: #4A2A20;
+    --act-acro-soft: #473514; --act-familiar-soft: #4A2236; --act-funcional-soft: #17382E;
+    --estado-ok: #7CC8EE; --estado-aviso: #F0C060; --estado-error: #FF8E85;
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.35);
+}
+/* El color de cada actividad lo define el backend: se aplica con style="--c:#hex" y la clase .act (tono suave derivado). */
+.act { --s: color-mix(in srgb, var(--c) 16%, var(--surface-100)); }

@@ -1,0 +1,9 @@
+---
+import C from '../../../components/Activity.astro';
+import { loadActivities } from '../../../data/activities';
+export async function getStaticPaths() {
+  return (await loadActivities()).map((x) => ({ params: { slug: x.slug.es }, props: { id: x.id } }));
+}
+const { id } = Astro.props;
+---
+<C lang="es" id={id} />

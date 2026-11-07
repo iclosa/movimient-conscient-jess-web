@@ -1,0 +1,132 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Cta from './Cta.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, itemPath, type Lang } from '../i18n/routes';
+import { loadActivities } from '../data/activities';
+const activities = await loadActivities();
+import { API_URL } from '../lib/api';
+import { breadcrumbLd } from '../lib/seo';
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const s = t.schedule;
+const crumbs = [{ name: t.crumbHome, path: sectionPath(lang, 'home') }, { name: t.nav.schedule, path: sectionPath(lang, 'schedule') }];
+const today = (new Date().getDay() + 6) % 7;
+// Configuración para el script del navegador: el horario y las plazas se leen en vivo de la API del backend.
+const cfg = {
+  api: API_URL,
+  few: 3, // a partir de este número de plazas libres se avisa con "Poques places"
+  appHref: sectionPath(lang, 'app'),
+  strings: { fullWait: s.fullWait, few: s.few, spots: s.spots, book: s.book, none: s.none, error: s.error },
+  activities: activities.map((a) => ({
+    name: a.t[lang].name,
+    href: itemPath(lang, 'activities', a.slug[lang]),
+    match: [a.slug.ca, a.slug.es],
+  })),
+};
+---
+<Base lang={lang} section="schedule" title={s.metaTitle} description={s.metaDesc}
+  alt={{ ca: sectionPath('ca', 'schedule'), es: sectionPath('es', 'schedule') }}
+  jsonLd={[breadcrumbLd(Astro.site!.origin, crumbs)]}>
+  <Breadcrumbs items={crumbs} />
+  <section class="page-hero"><div class="wrap"><h1>{s.h1}</h1><p class="lead">{s.intro}</p></div></section>
+  <section class="section"><div class="wrap">
+    <div class="days" role="group" aria-label={s.h1}>
+      {s.days.map((d, i) => (<button type="button" data-day={i} aria-pressed={i === today ? 'true' : 'false'}>{d}</button>))}
+    </div>
+    <div id="schedule-panels" aria-live="polite">
+      {s.days.map((_, i) => (
+        <div data-panel={i} hidden={i !== today}><p class="note">{s.loading}</p></div>
+      ))}
+    </div>
+    <div class="callout"><h2>{s.noteTitle}</h2><ul>{s.notes.map((n) => <li>{n}</li>)}</ul></div>
+  </div></section>
+  <Cta lang={lang} />
+  <script is:inline type="application/json" id="schedule-cfg" set:html={JSON.stringify(cfg)} />
+  <script>
+    interface Session {
+      starts_at: string;
+      spots_left: number;
+      state: string;
+      activity?: { slug: string; name: string; color?: string; color_text?: string } | null;
+    }
+    const cfg = JSON.parse(document.getElementById('schedule-cfg')!.textContent!);
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.days button');
+    const panels = document.querySelectorAll<HTMLElement>('[data-panel]');
+    buttons.forEach((b) => b.addEventListener('click', () => {
+      buttons.forEach((x) => b === x ? x.setAttribute('aria-pressed', 'true') : x.setAttribute('aria-pressed', 'false'));
+      panels.forEach((p) => { p.hidden = p.dataset.panel !== b.dataset.day; });
+    }));
+
+    const TZ = 'Europe/Madrid';
+    const ymd = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(d);
+    const hm = new Intl.DateTimeFormat('ca-ES', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: TZ });
+    const wd = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: TZ });
+    const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    // Se construye con textContent (nunca innerHTML) porque los textos vienen de la API.
+    const el = (tag: string, cls?: string, text?: string) => {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== undefined) n.textContent = text;
+      return n;
+    };
+
+    function slot(sess: Session, d: Date) {
+      const act = cfg.activities.find((a: any) => sess.activity && a.match.includes(sess.activity.slug));
+      const row = el('div', 'slot act');
+      if (sess.activity?.color) {
+        row.style.setProperty('--c', sess.activity.color);
+        row.style.setProperty('--on-act', sess.activity.color_text ?? '#FFFFFF');
+      }
+      row.append(el('span', 'time', hm.format(d)));
+      const info = el('span', 'info');
+      if (act) {
+        const a = el('a', 'tag', act.name) as HTMLAnchorElement;
+        a.href = act.href;
+        info.append(a);
+      } else {
+        info.append(el('span', 'tag', sess.activity?.name ?? ''));
+      }
+      row.append(info);
+      const state = el('span', 'state');
+      if (sess.state === 'full' || sess.spots_left <= 0) {
+        state.append(el('span', 'chip error', cfg.strings.fullWait));
+      } else {
+        state.append(sess.spots_left <= cfg.few
+          ? el('span', 'chip aviso', `${cfg.strings.few} · ${sess.spots_left}`)
+          : el('span', 'caption', `${sess.spots_left} ${cfg.strings.spots}`));
+        const book = el('a', 'btn small', cfg.strings.book) as HTMLAnchorElement;
+        book.href = cfg.appHref;
+        state.append(book);
+      }
+      row.append(state);
+      return row;
+    }
+
+    function fill(panel: HTMLElement, rows: HTMLElement[], message?: string) {
+      panel.replaceChildren(...(rows.length ? rows : [el('p', message ? 'note' : '', message ?? cfg.strings.none)]));
+    }
+
+    async function load() {
+      const now = new Date();
+      const to = new Date(now.getTime() + 6 * 86400000);
+      try {
+        const res = await fetch(`${cfg.api}/sessions?from=${ymd(now)}&to=${ymd(to)}`, { headers: { Accept: 'application/json' } });
+        if (!res.ok) throw new Error(String(res.status));
+        const sessions: Session[] = (await res.json()).data;
+        const byDay: HTMLElement[][] = [[], [], [], [], [], [], []];
+        for (const sess of sessions) {
+          const d = new Date(sess.starts_at);
+          if (d.getTime() < now.getTime() || sess.state === 'cancelled') continue;
+          byDay[WEEKDAYS.indexOf(wd.format(d))].push(slot(sess, d));
+        }
+        panels.forEach((p) => fill(p, byDay[Number(p.dataset.panel)]));
+      } catch {
+        panels.forEach((p) => fill(p, [], cfg.strings.error));
+      }
+    }
+    load();
+  </script>
+</Base>

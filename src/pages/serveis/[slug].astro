@@ -1,0 +1,9 @@
+---
+import C from '../../components/Service.astro';
+import { services } from '../../data/services';
+export function getStaticPaths() {
+  return services.map((x) => ({ params: { slug: x.slug.ca }, props: { id: x.id } }));
+}
+const { id } = Astro.props;
+---
+<C lang="ca" id={id} />

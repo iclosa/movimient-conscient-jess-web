@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Faq from './Faq.astro';
+import Cta from './Cta.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, itemPath, type Lang } from '../i18n/routes';
+import { loadActivities, actStyle } from '../data/activities';
+const all = await loadActivities();
+import { breadcrumbLd, faqLd, serviceLd } from '../lib/seo';
+const { lang, id } = Astro.props as { lang: Lang; id: string };
+const t = ui[lang];
+const act = all.find((a) => a.id === id)!;
+const x = act.t[lang];
+const origin = Astro.site!.origin;
+const self = itemPath(lang, 'activities', act.slug[lang]);
+const crumbs = [
+  { name: t.crumbHome, path: sectionPath(lang, 'home') },
+  { name: t.nav.activities, path: sectionPath(lang, 'activities') },
+  { name: x.name, path: self },
+];
+---
+<Base lang={lang} section="activities" title={x.metaTitle} description={x.metaDesc}
+  alt={{ ca: itemPath('ca', 'activities', act.slug.ca), es: itemPath('es', 'activities', act.slug.es) }}
+  jsonLd={[breadcrumbLd(origin, crumbs), serviceLd(origin, { name: x.h1, description: x.metaDesc, path: self }), faqLd(x.faq)]}>
+  <Breadcrumbs items={crumbs} />
+  <section class="page-hero"><div class="wrap narrow">
+    <span class="tag act" style={actStyle(act)}>{x.level}</span>
+    <h1 style="margin-top:.6rem">{x.h1}</h1>
+    <p class="lead">{x.intro}</p>
+    {act.priceLabel && <p class="meta">{t.activities.price}: <strong>{act.priceLabel}</strong></p>}
+    <div class="actions"><a class="btn" href={sectionPath(lang, 'app')}>{t.cta.book}</a></div>
+  </div></section>
+
+  <section class="section"><div class="wrap narrow prose">
+    <h2>{t.benefits}</h2>
+    <ul class="checks act" style={actStyle(act)}>{x.benefits.map((b) => <li>{b}</li>)}</ul>
+    <h2>{t.forWho}</h2>
+    <p>{x.forWho}</p>
+    <h2>{t.expect}</h2>
+    <p>{x.expect}</p>
+    <div class="callout"><h3>{t.firstTime}</h3><p>{t.firstTimeText}</p></div>
+  </div></section>
+
+  <Faq title={t.faqTitle} items={x.faq} />
+
+  <section class="section"><div class="wrap">
+    <div class="section-head"><h2>{t.related}</h2></div>
+    <div class="grid">
+      {act.related.map((rid) => all.find((a) => a.id === rid)).filter((r) => r !== undefined).map((r) => {
+        return (
+          <article class="card act" style={actStyle(r)}>
+            <span class="dot"></span>
+            <h3><a href={itemPath(lang, 'activities', r.slug[lang])}>{r.t[lang].name}</a></h3>
+            <p>{r.t[lang].short}</p>
+          </article>
+        );
+      })}
+    </div>
+  </div></section>
+  <p class="wrap narrow disclaimer">{t.disclaimer}</p>
+  <Cta lang={lang} />
+</Base>

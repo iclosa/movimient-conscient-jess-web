@@ -1,0 +1,22 @@
+---
+import { ui } from '../i18n/ui';
+import { fmtDate, type EventItem } from '../lib/content';
+import type { Lang } from '../i18n/routes';
+const { lang, events } = Astro.props as { lang: Lang; events: EventItem[] };
+const t = ui[lang].events;
+---
+<div class="grid">
+  {events.map((e) => (
+    <article class="card">
+      <p class="eyebrow">{t.types[e.type] ?? e.type}</p>
+      <h3>{e.title}</h3>
+      <p><strong>{fmtDate(e.starts_at, lang)}</strong>{e.location ? ` · ${e.location}` : ''}</p>
+      {e.description && <p>{e.description}</p>}
+      <p class="meta">
+        {e.price_label || t.free}
+        {e.spots_left !== null && (e.spots_left > 0 ? ` · ${e.spots_left} ${t.spots}` : ` · ${t.full}`)}
+      </p>
+      <span class="more">{t.bookInApp}</span>
+    </article>
+  ))}
+</div>

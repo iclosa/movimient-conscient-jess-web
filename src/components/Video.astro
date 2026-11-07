@@ -1,0 +1,47 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Cta from './Cta.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, itemPath, type Lang } from '../i18n/routes';
+import { freeVideos, fmtDuration, videoActivity } from '../data/videos';
+import { loadActivities, actStyle } from '../data/activities';
+import { breadcrumbLd, videoLd } from '../lib/seo';
+const { lang, id } = Astro.props as { lang: Lang; id: string };
+const t = ui[lang];
+const v = t.videos;
+const all = await freeVideos();
+const acts = await loadActivities();
+const video = all.find((x) => x.id === id)!;
+const x = video.t[lang];
+const a = videoActivity(video, acts);
+const origin = Astro.site!.origin;
+const self = itemPath(lang, 'videos', video.slug[lang]);
+const crumbs = [
+  { name: t.crumbHome, path: sectionPath(lang, 'home') },
+  { name: t.nav.videos, path: sectionPath(lang, 'videos') },
+  { name: x.title, path: self },
+];
+const others = all.filter((o) => o.id !== id).slice(0, 3);
+const ld = [breadcrumbLd(origin, crumbs)];
+if (video.thumbnail) ld.push(videoLd(origin, { name: x.title, description: x.desc, thumbnail: video.thumbnail, uploadDate: video.uploadDate, minutes: video.minutes, seconds: video.seconds ?? 0, embedUrl: video.embedUrl, lang }));
+---
+<Base lang={lang} section="videos" title={x.title} description={x.desc}
+  alt={{ ca: itemPath('ca', 'videos', video.slug.ca), es: itemPath('es', 'videos', video.slug.es) }} jsonLd={ld}>
+  <Breadcrumbs items={crumbs} />
+  <section class="section"><div class="wrap narrow">
+    <p class="meta"><span class="tag act" style={actStyle(a)}>{a.t[lang].name}</span> · <span class="tnum">{fmtDuration(video)}</span> · {v.free}</p>
+    <h1>{x.title}</h1>
+    <div class="embed"><iframe src={video.embedUrl} title={x.title} loading="lazy" allow="fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+    <p class="prose" style="margin-top:var(--space-5)">{x.desc}</p>
+    <p class="disclaimer">{t.disclaimer}</p>
+    <p><a href={sectionPath(lang, 'videos')}>← {v.back}</a></p>
+  </div></section>
+  {others.length > 0 && (
+    <section class="section alt"><div class="wrap">
+      <div class="section-head"><h2>{v.others}</h2></div>
+      <div class="grid">{others.map((o) => (<article class="card"><h3><a href={itemPath(lang, 'videos', o.slug[lang])}>{o.t[lang].title}</a></h3><p>{fmtDuration(o)}</p></article>))}</div>
+    </div></section>
+  )}
+  <Cta lang={lang} />
+</Base>

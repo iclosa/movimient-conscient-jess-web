@@ -1,0 +1,95 @@
+---
+import Base from '../layouts/Base.astro';
+import Faq from './Faq.astro';
+import Cta from './Cta.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, itemPath, type Lang } from '../i18n/routes';
+import { loadActivities, actStyle } from '../data/activities';
+const activities = await loadActivities();
+import Promos from './Promos.astro';
+import EventCards from './EventCards.astro';
+import { loadEvents, loadPosts } from '../lib/content';
+const posts = (await loadPosts()).slice(0, 3);
+const events = (await loadEvents()).slice(0, 3);
+import { faqLd } from '../lib/seo';
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const h = t.home;
+const origin = Astro.site!.origin;
+---
+<Base lang={lang} section="home" title={h.metaTitle} description={h.metaDesc}
+  alt={{ ca: sectionPath('ca', 'home'), es: sectionPath('es', 'home') }} jsonLd={[faqLd(h.faq as any)]}>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">{h.eyebrow}</p>
+      <h1>{h.h1}</h1>
+      <p class="lead">{h.lead}</p>
+      <div class="actions">
+        <a class="btn" href={sectionPath(lang, 'app')}>{h.cta}</a>
+        <a class="btn alt" href={sectionPath(lang, 'activities')}>{h.cta2}</a>
+      </div>
+      <ul class="facts">{h.facts.map((f) => <li>{f}</li>)}</ul>
+    </div>
+  </section>
+
+  <Promos lang={lang} />
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head"><h2>{h.activitiesTitle}</h2><p>{h.activitiesIntro}</p></div>
+      <div class="grid">
+        {activities.map((a) => (
+          <article class="card act" style={actStyle(a)}>
+            <span class="dot"></span>
+            <h3><a href={itemPath(lang, 'activities', a.slug[lang])}>{a.t[lang].name}</a></h3>
+            <p>{a.t[lang].short}</p>
+            <span class="more" aria-hidden="true">{t.activities.more} →</span>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="wrap">
+      <div class="section-head"><h2>{h.whyTitle}</h2></div>
+      <div class="grid">{h.why.map((w) => <div class="card"><h3>{w.t}</h3><p>{w.d}</p></div>)}</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head"><h2>{t.events.homeTitle}</h2><p>{t.events.homeIntro}</p></div>
+      {events.length > 0 ? <EventCards lang={lang} events={events} /> : <p>{t.events.empty}</p>}
+      <p class="section-cta"><a class="btn alt" href={sectionPath(lang, 'events')}>{t.events.all}</a></p>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="wrap narrow prose">
+      <h2 style="margin-top:0">{h.aboutTitle}</h2>
+      <p>{h.aboutText}</p>
+      <p><a class="btn alt" href={sectionPath(lang, 'about')}>{h.aboutCta}</a></p>
+      <h2>{h.areaTitle}</h2>
+      <p>{h.areaText}</p>
+    </div>
+  </section>
+
+  {posts.length > 0 && <section class="section">
+    <div class="wrap">
+      <div class="section-head"><h2>{h.blogTitle}</h2></div>
+      <div class="grid">
+        {posts.map((p) => (
+          <article class="card">
+            <h3><a href={itemPath(lang, 'blog', p.translations[lang].slug)}>{p.translations[lang].title}</a></h3>
+            <p>{p.translations[lang].excerpt}</p>
+            <span class="more" aria-hidden="true">{t.readMore} →</span>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>}
+
+  <Faq title={t.faqTitle} items={h.faq} />
+  <Cta lang={lang} />
+</Base>

@@ -1,0 +1,40 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Cta from './Cta.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, itemPath, type Lang } from '../i18n/routes';
+import { loadPosts, parseBody } from '../lib/content';
+import { breadcrumbLd, articleLd } from '../lib/seo';
+const { lang, id } = Astro.props as { lang: Lang; id: number };
+const t = ui[lang];
+const post = (await loadPosts()).find((p) => p.id === id)!;
+const x = post.translations[lang];
+const blocks = parseBody(x.body);
+const origin = Astro.site!.origin;
+const self = itemPath(lang, 'blog', x.slug);
+const desc = x.excerpt || x.intro || x.title;
+const crumbs = [
+  { name: t.crumbHome, path: sectionPath(lang, 'home') },
+  { name: t.nav.blog, path: sectionPath(lang, 'blog') },
+  { name: x.title, path: self },
+];
+const date = new Date(post.published_at).toLocaleDateString(lang === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<Base lang={lang} section="blog" title={x.title} description={desc} ogType="article"
+  alt={{ ca: itemPath('ca', 'blog', post.translations.ca.slug), es: itemPath('es', 'blog', post.translations.es.slug) }}
+  jsonLd={[breadcrumbLd(origin, crumbs), articleLd(origin, { title: x.title, description: desc, path: self, date: post.published_at.slice(0, 10), lang })]}>
+  <Breadcrumbs items={crumbs} />
+  <article class="section"><div class="wrap narrow prose">
+    <p class="meta">{t.blog.published} {date}</p>
+    <h1>{x.title}</h1>
+    {x.intro && <p class="lead">{x.intro}</p>}
+    {post.image_url && <img src={post.image_url} alt="" loading="lazy" style="width:100%;border-radius:var(--radius-lg)" />}
+    {blocks.map((b) => b.type === 'h2'
+      ? <h2>{b.text}</h2>
+      : <p>{b.parts.map((i) => typeof i === 'string' ? i : <a href={i.href}>{i.text}</a>)}</p>)}
+    <p class="disclaimer">{t.disclaimer}</p>
+    <p><a href={sectionPath(lang, 'blog')}>← {t.blog.back}</a></p>
+  </div></article>
+  <Cta lang={lang} />
+</Base>

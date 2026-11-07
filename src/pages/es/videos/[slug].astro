@@ -1,0 +1,9 @@
+---
+import C from '../../../components/Video.astro';
+import { freeVideos } from '../../../data/videos';
+export async function getStaticPaths() {
+  return (await freeVideos()).map((x) => ({ params: { slug: x.slug.es }, props: { id: x.id } }));
+}
+const { id } = Astro.props;
+---
+<C lang="es" id={id} />

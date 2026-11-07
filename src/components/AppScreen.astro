@@ -1,0 +1,98 @@
+---
+/** Mockup decorativo de una pantalla de la app (HTML/CSS, no es una captura real). */
+import { ui } from '../i18n/ui';
+import { actStyle, type Activity } from '../data/activities';
+import type { Lang } from '../i18n/routes';
+const { lang, screen, activities = [] } = Astro.props as { lang: Lang; screen: 'home' | 'book' | 'videos' | 'more'; activities?: Activity[] };
+const s = ui[lang].app.screens;
+const active = { home: 0, book: 1, videos: 2, more: 4 }[screen];
+const [a1, a2, a3, a4] = [activities[1] ?? activities[0], activities[2] ?? activities[0], activities[0], activities[3] ?? activities[0]];
+const name = (a?: Activity, fb = '') => a?.t[lang].name ?? fb;
+const sty = (a?: Activity) => (a ? actStyle(a) : '--c:#6A3593;--on-act:#fff');
+---
+<div class="phone" aria-hidden="true">
+  <div class="phone-screen">
+    <div class="ph-status"><span>9:41</span><span class="ph-notch"></span><span>●●●</span></div>
+    <div class="ph-body">
+      {screen === 'home' && (<>
+        <p class="ph-h">{s.hello}</p>
+        <div class="ph-card ph-next act" style={sty(a1)}>
+          <small>{s.next}</small>
+          <strong>{name(a1, 'Hatha Ioga')}</strong>
+          <span>{s.tomorrow} · {s.room}</span>
+        </div>
+        <div class="ph-card ph-promo"><small>{s.promo}</small><strong>{s.promoT}</strong></div>
+        <div class="ph-card"><small>{s.soon}</small><strong>{s.soonT}</strong></div>
+        <div class="ph-card ph-rate"><strong>{s.rate}</strong><span class="ph-stars">★★★★★</span></div>
+      </>)}
+      {screen === 'book' && (<>
+        <div class="ph-days">{s.days.map((d, i) => <span class:list={['ph-day', i === 1 && 'on']}><small>{d}</small><b>{10 + i}</b></span>)}</div>
+        <div class="ph-row act" style={sty(a3)}><i class="dot"></i><div><strong>{name(a3, 'Hatha Ioga')}</strong><small>09:30</small></div><em>4 {s.spots}</em></div>
+        <div class="ph-row act" style={sty(a2)}><i class="dot"></i><div><strong>{name(a2, 'Vinyasa')}</strong><small>19:00</small></div><em class="full">{s.full}</em></div>
+        <div class="ph-row act" style={sty(a1)}><i class="dot"></i><div><strong>{name(a1, 'Ioga Nidra')}</strong><small>20:15</small></div><em class="ok">{s.booked}</em></div>
+        <div class="ph-row act" style={sty(a4)}><i class="dot"></i><div><strong>{name(a4, 'Ioga HIT')}</strong><small>18:30</small></div><em>8 {s.spots}</em></div>
+      </>)}
+      {screen === 'videos' && (<>
+        <div class="ph-vid act" style={sty(a3)}><span class="ph-play">▶</span><b>{s.free}</b></div>
+        <p class="ph-vt">{s.v1} · 12 {s.min}</p>
+        <div class="ph-vid act" style={sty(a2)}><span class="ph-play">▶</span><b class="paid">{s.paid}</b></div>
+        <p class="ph-vt">{s.v2} · 20 {s.min}</p>
+      </>)}
+      {screen === 'more' && (
+        <div class="ph-tiles">
+          <div class="ph-tile">🧘<b>{s.t1}</b></div>
+          <div class="ph-tile">🌅<b>{s.t2}</b><small>07:52</small></div>
+          <div class="ph-tile ph-breath"><span></span><b>{s.t3}</b></div>
+          <div class="ph-tile">🔔<b>{s.t4}</b><small>10:00</small></div>
+          <div class="ph-tile wide">💜<b>{s.t5}</b></div>
+        </div>
+      )}
+    </div>
+    <div class="ph-nav">{s.nav.map((n, i) => <span class:list={[i === active && 'on']}><i></i>{n}</span>)}</div>
+  </div>
+</div>
+
+<style>
+  .phone { width: 260px; max-width: 100%; padding: 9px; border-radius: 40px; background: #231B2B; box-shadow: 0 24px 50px rgba(35,27,43,.28); flex: none; }
+  .phone-screen { height: 520px; border-radius: 32px; overflow: hidden; background: var(--surface-100); display: flex; flex-direction: column; font-size: 12px; line-height: 16px; color: var(--ink); }
+  .ph-status { display: flex; justify-content: space-between; align-items: center; padding: 10px 18px 4px; font-size: 11px; font-weight: 600; }
+  .ph-notch { width: 62px; height: 16px; border-radius: 10px; background: #231B2B; }
+  .ph-body { flex: 1; padding: 10px 14px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+  .ph-h { margin: 4px 0 2px; font: 700 20px/24px var(--font-display); }
+  .ph-card { background: #fff; border-radius: 16px; padding: 12px 14px; box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: 2px; }
+  .ph-card small, .ph-row small { color: var(--ink-muted); font-size: 11px; }
+  .ph-card strong { font-size: 14px; }
+  .ph-next { background: var(--c); color: var(--on-act); }
+  .ph-next small { color: inherit; opacity: .85; }
+  .ph-next strong { font: 700 20px/24px var(--font-display); }
+  .ph-promo { background: #E6D8F3; box-shadow: none; }
+  .ph-rate { align-items: flex-start; }
+  .ph-stars { color: #D9A21B; letter-spacing: 3px; font-size: 16px; }
+  .ph-days { display: flex; gap: 6px; }
+  .ph-day { flex: 1; text-align: center; padding: 6px 0; border-radius: 12px; background: #fff; display: flex; flex-direction: column; }
+  .ph-day b { font-size: 14px; }
+  .ph-day.on { background: var(--violeta); color: #fff; }
+  .ph-day.on small { color: #fff; }
+  .ph-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 14px; padding: 12px; box-shadow: var(--shadow-card); border-left: 5px solid var(--c); }
+  .ph-row .dot { display: none; }
+  .ph-row div { flex: 1; display: flex; flex-direction: column; }
+  .ph-row em { font-style: normal; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; background: var(--s); }
+  .ph-row em.full { background: #F7DACF; color: #8a2a12; }
+  .ph-row em.ok { background: #D6EEF1; color: #0b5360; }
+  .ph-vid { position: relative; height: 130px; border-radius: 16px; background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 55%, #231B2B)); display: grid; place-items: center; }
+  .ph-play { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,.92); color: var(--c); display: grid; place-items: center; font-size: 16px; padding-left: 3px; }
+  .ph-vid b { position: absolute; top: 8px; left: 8px; font-size: 10px; padding: 3px 8px; border-radius: 999px; background: #fff; color: #231B2B; }
+  .ph-vid b.paid { background: #231B2B; color: #fff; }
+  .ph-vt { margin: -4px 0 4px; font-weight: 600; }
+  .ph-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ph-tile { background: #fff; border-radius: 16px; padding: 14px 12px; box-shadow: var(--shadow-card); display: flex; flex-direction: column; gap: 4px; font-size: 22px; line-height: 26px; min-height: 92px; }
+  .ph-tile b { font-size: 13px; line-height: 16px; }
+  .ph-tile small { color: var(--ink-muted); font-size: 11px; }
+  .ph-tile.wide { grid-column: span 2; min-height: 0; }
+  .ph-breath span { width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle, #2BB5AE 0 45%, #D6EEF1 46%); }
+  .ph-nav { display: flex; justify-content: space-around; padding: 8px 4px 14px; background: #fff; border-top: 1px solid var(--line); font-size: 10px; color: var(--ink-muted); }
+  .ph-nav span { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .ph-nav i { width: 16px; height: 16px; border-radius: 6px; background: var(--line); }
+  .ph-nav .on { color: var(--violeta); font-weight: 700; }
+  .ph-nav .on i { background: var(--violeta); }
+</style>

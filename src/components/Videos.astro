@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Cta from './Cta.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, itemPath, type Lang } from '../i18n/routes';
+import { freeVideos, fmtDuration, videoActivity } from '../data/videos';
+import { loadActivities, actStyle } from '../data/activities';
+import { breadcrumbLd } from '../lib/seo';
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const v = t.videos;
+const list = await freeVideos();
+const acts = await loadActivities();
+const crumbs = [{ name: t.crumbHome, path: sectionPath(lang, 'home') }, { name: t.nav.videos, path: sectionPath(lang, 'videos') }];
+---
+<Base lang={lang} section="videos" title={v.metaTitle} description={v.metaDesc}
+  alt={{ ca: sectionPath('ca', 'videos'), es: sectionPath('es', 'videos') }}
+  jsonLd={[breadcrumbLd(Astro.site!.origin, crumbs)]}>
+  <Breadcrumbs items={crumbs} />
+  <section class="page-hero"><div class="wrap"><h1>{v.h1}</h1><p class="lead">{v.intro}</p></div></section>
+  <section class="section"><div class="wrap">
+    {list.length === 0
+      ? <div class="callout"><p>{v.empty}</p></div>
+      : <div class="grid">
+          {list.map((x) => {
+            const a = videoActivity(x, acts);
+            return (
+              <article class="card video act" style={actStyle(a)}>
+                <div class="thumb">
+                  {x.thumbnail && <img src={x.thumbnail} alt="" loading="lazy" width="640" height="360" />}
+                  <span class="play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg></span>
+                  <span class="time">{fmtDuration(x)}</span>
+                </div>
+                <div class="body">
+                  <h2><a href={itemPath(lang, 'videos', x.slug[lang])}>{x.t[lang].title}</a></h2>
+                  <div class="foot"><span class="tag">{a.t[lang].name}</span><span class="free">{v.free}</span></div>
+                </div>
+              </article>
+            );
+          })}
+        </div>}
+    <p style="margin-top:var(--space-6)">{v.moreText} <a href={sectionPath(lang, 'app')}>{v.more} →</a></p>
+  </div></section>
+  <Cta lang={lang} />
+</Base>

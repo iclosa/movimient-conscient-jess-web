@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Cta from './Cta.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, type Lang } from '../i18n/routes';
+import { breadcrumbLd } from '../lib/seo';
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const a = t.about;
+const crumbs = [{ name: t.crumbHome, path: sectionPath(lang, 'home') }, { name: t.nav.about, path: sectionPath(lang, 'about') }];
+---
+<Base lang={lang} section="about" title={a.metaTitle} description={a.metaDesc}
+  alt={{ ca: sectionPath('ca', 'about'), es: sectionPath('es', 'about') }}
+  jsonLd={[breadcrumbLd(Astro.site!.origin, crumbs)]}>
+  <Breadcrumbs items={crumbs} />
+  <section class="section"><div class="wrap narrow prose">
+    <h1>{a.h1}</h1>
+    {a.text.map((p) => <p>{p}</p>)}
+    <p class="sign">Jess</p>
+  </div></section>
+  <section class="section alt"><div class="wrap">
+    <div class="section-head"><h2>{a.valuesTitle}</h2></div>
+    <div class="grid">{a.values.map((v) => <div class="card"><h3>{v.t}</h3><p>{v.d}</p></div>)}</div>
+  </div></section>
+  <Cta lang={lang} />
+</Base>

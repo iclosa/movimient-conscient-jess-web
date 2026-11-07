@@ -1,0 +1,41 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Cta from './Cta.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, itemPath, type Lang } from '../i18n/routes';
+import { loadActivities, actStyle } from '../data/activities';
+const activities = await loadActivities();
+import { loadPosts } from '../lib/content';
+import { breadcrumbLd } from '../lib/seo';
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const a = t.activities;
+const crumbs = [{ name: t.crumbHome, path: sectionPath(lang, 'home') }, { name: t.nav.activities, path: sectionPath(lang, 'activities') }];
+const guide = (await loadPosts()).find((p) => p.translations.ca.slug === 'hatha-vinyasa-o-nidra-quin-ioga-et-va-millor');
+---
+<Base lang={lang} section="activities" title={a.metaTitle} description={a.metaDesc}
+  alt={{ ca: sectionPath('ca', 'activities'), es: sectionPath('es', 'activities') }}
+  jsonLd={[breadcrumbLd(Astro.site!.origin, crumbs)]}>
+  <Breadcrumbs items={crumbs} />
+  <section class="page-hero"><div class="wrap">
+    <h1>{a.h1}</h1>
+    <p class="lead">{a.intro}</p>
+  </div></section>
+  <section class="section"><div class="wrap">
+    <div class="grid">
+      {activities.map((x) => (
+        <article class="card act" style={actStyle(x)}>
+          <span class="dot"></span>
+          <h2><a href={itemPath(lang, 'activities', x.slug[lang])}>{x.t[lang].name}</a></h2>
+          <p>{x.t[lang].short}</p>
+          <p class="meta">{a.level}: {x.t[lang].level}</p>
+          {x.priceLabel && <p class="meta">{a.price}: <strong>{x.priceLabel}</strong></p>}
+          <span class="more" aria-hidden="true">{a.more} →</span>
+        </article>
+      ))}
+    </div>
+    {guide && <p style="margin-top:2rem">{a.how} <a href={itemPath(lang, 'blog', guide.translations[lang].slug)}>{guide.translations[lang].title}</a>.</p>}
+  </div></section>
+  <Cta lang={lang} />
+</Base>

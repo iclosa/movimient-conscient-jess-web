@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, itemPath, type Lang } from '../i18n/routes';
+import { loadPosts } from '../lib/content';
+const posts = await loadPosts();
+import { breadcrumbLd } from '../lib/seo';
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const b = t.blog;
+const crumbs = [{ name: t.crumbHome, path: sectionPath(lang, 'home') }, { name: t.nav.blog, path: sectionPath(lang, 'blog') }];
+const fmt = (d: string) => new Date(d).toLocaleDateString(lang === 'ca' ? 'ca-ES' : 'es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+<Base lang={lang} section="blog" title={b.metaTitle} description={b.metaDesc}
+  alt={{ ca: sectionPath('ca', 'blog'), es: sectionPath('es', 'blog') }}
+  jsonLd={[breadcrumbLd(Astro.site!.origin, crumbs)]}>
+  <Breadcrumbs items={crumbs} />
+  <section class="page-hero"><div class="wrap"><h1>{b.h1}</h1><p class="lead">{b.intro}</p></div></section>
+  <section class="section"><div class="wrap"><div class="grid">
+    {posts.map((p) => (
+      <article class="card">
+        <p class="meta">{fmt(p.published_at)}</p>
+        <h2><a href={itemPath(lang, 'blog', p.translations[lang].slug)}>{p.translations[lang].title}</a></h2>
+        <p>{p.translations[lang].excerpt}</p>
+        <span class="more" aria-hidden="true">{t.readMore} →</span>
+      </article>
+    ))}
+  </div></div></section>
+</Base>

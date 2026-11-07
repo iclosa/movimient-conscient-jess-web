@@ -1,0 +1,81 @@
+---
+import Base from '../layouts/Base.astro';
+import Breadcrumbs from './Breadcrumbs.astro';
+import Faq from './Faq.astro';
+import Cta from './Cta.astro';
+import AppScreen from './AppScreen.astro';
+import { ui } from '../i18n/ui';
+import { sectionPath, type Lang } from '../i18n/routes';
+import { site } from '../data/site';
+import { loadActivities } from '../data/activities';
+import { breadcrumbLd, faqLd } from '../lib/seo';
+const { lang } = Astro.props as { lang: Lang };
+const t = ui[lang];
+const a = t.app;
+const activities = await loadActivities();
+const crumbs = [{ name: t.crumbHome, path: sectionPath(lang, 'home') }, { name: t.nav.app, path: sectionPath(lang, 'app') }];
+const hasStore = Boolean(site.appStoreUrl || site.playStoreUrl);
+---
+<Base lang={lang} section="app" title={a.metaTitle} description={a.metaDesc}
+  alt={{ ca: sectionPath('ca', 'app'), es: sectionPath('es', 'app') }}
+  jsonLd={[breadcrumbLd(Astro.site!.origin, crumbs), faqLd(a.faq as any)]}>
+  <Breadcrumbs items={crumbs} />
+
+  <section class="app-hero"><div class="wrap app-hero-grid">
+    <div>
+      <p class="eyebrow">{a.hero.eyebrow}</p>
+      <h1>{a.h1}</h1>
+      <p class="lead">{a.lead}</p>
+      <div class="store">
+        {site.appStoreUrl && <a class="btn" href={site.appStoreUrl} rel="noopener">{a.appStore}</a>}
+        {site.playStoreUrl && <a class="btn" href={site.playStoreUrl} rel="noopener">{a.playStore}</a>}
+        {!hasStore && <p class="note">{a.soon}</p>}
+      </div>
+      <ul class="chips">{a.hero.chips.map((c) => <li>{c}</li>)}</ul>
+    </div>
+    <div class="app-hero-phones">
+      <div class="p-back"><AppScreen lang={lang} screen="book" activities={activities} /></div>
+      <div class="p-front"><AppScreen lang={lang} screen="home" activities={activities} /></div>
+    </div>
+  </div></section>
+
+  <section class="section alt"><div class="wrap">
+    <div class="section-head"><h2>{a.showcaseTitle}</h2></div>
+    {a.showcases.map((x, i) => (
+      <div class:list={['showcase', i % 2 === 1 && 'rev']}>
+        <div class="showcase-text">
+          <p class="eyebrow">{x.eyebrow}</p>
+          <h3>{x.t}</h3>
+          <p class="lead">{x.d}</p>
+          <ul class="ticks">{x.b.map((b) => <li>{b}</li>)}</ul>
+        </div>
+        <div class="showcase-phone"><AppScreen lang={lang} screen={x.screen as any} activities={activities} /></div>
+      </div>
+    ))}
+    <p class="meta">{a.screenNote}</p>
+  </div></section>
+
+  <section class="section"><div class="wrap">
+    <div class="section-head"><h2>{a.featuresTitle}</h2></div>
+    <div class="grid">{a.features.map((f) => <div class="card"><h3>{f.t}</h3><p>{f.d}</p></div>)}</div>
+  </div></section>
+
+  <section class="section alt"><div class="wrap narrow prose">
+    <h2 style="margin-top:0">{a.familyTitle}</h2>
+    <p>{a.familyText}</p>
+  </div></section>
+
+  <section class="section"><div class="wrap">
+    <div class="section-head"><h2>{a.stepsTitle}</h2></div>
+    <div class="grid steps">{a.steps.map((s) => <div class="card"><h3>{s.t}</h3><p>{s.d}</p></div>)}</div>
+    <div class="store section-cta">
+      {site.appStoreUrl && <a class="btn" href={site.appStoreUrl} rel="noopener">{a.appStore}</a>}
+      {site.playStoreUrl && <a class="btn" href={site.playStoreUrl} rel="noopener">{a.playStore}</a>}
+      {!hasStore && <p class="note">{a.soon}</p>}
+      <a class="btn alt" href={sectionPath(lang, 'schedule')}>{a.scheduleLink}</a>
+    </div>
+  </div></section>
+
+  <Faq title={t.faqTitle} items={a.faq} />
+  <Cta lang={lang} />
+</Base>
