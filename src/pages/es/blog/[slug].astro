@@ -1,9 +1,8 @@
 ---
 import C from '../../../components/Post.astro';
+import NotFound from '../../../components/NotFound.astro';
 import { loadPosts } from '../../../lib/content';
-export async function getStaticPaths() {
-  return (await loadPosts()).map((x) => ({ params: { slug: x.translations.es.slug }, props: { id: x.id } }));
-}
-const { id } = Astro.props;
+const item = (await loadPosts()).find((p) => p.translations.es.slug === Astro.params.slug);
+if (!item) Astro.response.status = 404;
 ---
-<C lang="es" id={id} />
+{item ? <C lang="es" id={item.id} /> : <NotFound lang="es" />}

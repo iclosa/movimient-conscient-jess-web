@@ -78,11 +78,8 @@ const fetchActivities = async (): Promise<Activity[]> => {
   }));
 };
 
-let cached: Promise<Activity[]> | undefined;
-
-/** Actividades visibles del backend. En el build se piden una sola vez; en `astro dev`, en cada petición. */
-export const loadActivities = (): Promise<Activity[]> =>
-  import.meta.env.PROD ? (cached ??= fetchActivities()) : fetchActivities();
+/** Actividades visibles del backend, leídas de la API en cada petición (api.ts comparte la petición unos segundos). */
+export const loadActivities = (): Promise<Activity[]> => fetchActivities();
 
 // Referencias antiguas (artículos del blog, vídeos escritos a mano) por id corto → slug catalán del backend.
 const legacyRefs: Record<string, string> = {

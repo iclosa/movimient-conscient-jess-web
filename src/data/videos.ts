@@ -69,11 +69,9 @@ const embedFor = (provider: string, ref: string): string => {
   return r;
 };
 
-let fromApi: Promise<Video[]> | undefined;
-
 /** Vídeos gratuitos publicados en el backend. El backend nunca envía los de pago a la web. */
 const loadFromApi = (): Promise<Video[]> =>
-  (fromApi ??= (async () => {
+  (async () => {
     const list = await apiGet<ApiVideo[]>('/videos');
     return (list ?? [])
       .filter((v) => !v.is_paid && v.playback)
@@ -88,7 +86,7 @@ const loadFromApi = (): Promise<Video[]> =>
         uploadDate: (v.published_at ?? new Date().toISOString()).slice(0, 10),
         t: { ca: { title: v.title, desc: v.description ?? '' }, es: { title: v.title, desc: v.description ?? '' } },
       }));
-  })());
+  })();
 
 /** Gratuitos escritos a mano en este archivo + gratuitos del backend. */
 export const freeVideos = async (): Promise<Video[]> => [...videos.filter((v) => v.free), ...(await loadFromApi())];

@@ -1,9 +1,8 @@
 ---
 import C from '../../components/Video.astro';
+import NotFound from '../../components/NotFound.astro';
 import { freeVideos } from '../../data/videos';
-export async function getStaticPaths() {
-  return (await freeVideos()).map((x) => ({ params: { slug: x.slug.ca }, props: { id: x.id } }));
-}
-const { id } = Astro.props;
+const item = (await freeVideos()).find((v) => v.slug.ca === Astro.params.slug);
+if (!item) Astro.response.status = 404;
 ---
-<C lang="ca" id={id} />
+{item ? <C lang="ca" id={item.id} /> : <NotFound lang="ca" />}
