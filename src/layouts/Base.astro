@@ -65,9 +65,15 @@ const graph = [businessLd(origin, lang), websiteLd(origin, lang), ...jsonLd];
           <nav class="nav" aria-label="Principal">
             {keys.map((k) => <a href={sectionPath(lang, k)} aria-current={k === section ? 'page' : undefined}>{t.nav[k]}</a>)}
             <a class="lang" href={alt[other]} hreflang={other} lang={other} title={ui[other].langName}>{other.toUpperCase()}</a>
+            <a class="btn menu-cta" href={sectionPath(lang, 'app')}>{t.cta.book}</a>
           </nav>
         </details>
-        <script is:inline>(function(){var d=document.querySelector('.menu');if(!d)return;var m=matchMedia('(min-width: 1000px)');function f(){d.open=m.matches}f();m.addEventListener('change',f);})();</script>
+        <script is:inline>(function(){var d=document.querySelector('.menu');if(!d)return;var m=matchMedia('(min-width: 1000px)'),h=document.documentElement,hd=document.querySelector('.header');
+function sync(){h.style.setProperty('--header-h',hd.offsetHeight+'px');h.classList.toggle('menu-open',d.open&&!m.matches)}
+function f(){d.open=m.matches;sync()}
+f();m.addEventListener('change',f);d.addEventListener('toggle',sync);addEventListener('resize',sync);addEventListener('pageshow',f);
+d.addEventListener('click',function(e){if(!m.matches&&e.target.closest('.nav a'))d.open=false});
+addEventListener('keydown',function(e){if(e.key==='Escape'&&!m.matches&&d.open){d.open=false;d.querySelector('summary').focus()}});})();</script>
       </div>
     </header>
     <main id="main"><slot /></main>
