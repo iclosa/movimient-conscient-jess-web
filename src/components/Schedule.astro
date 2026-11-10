@@ -54,10 +54,12 @@ const cfg = {
     const cfg = JSON.parse(document.getElementById('schedule-cfg')!.textContent!);
     const buttons = document.querySelectorAll<HTMLButtonElement>('.days button');
     const panels = document.querySelectorAll<HTMLElement>('[data-panel]');
-    buttons.forEach((b) => b.addEventListener('click', () => {
-      buttons.forEach((x) => b === x ? x.setAttribute('aria-pressed', 'true') : x.setAttribute('aria-pressed', 'false'));
+    let picked = false; // si la persona ja ha triat un dia, no li canviem la selecció quan arribin les dades
+    const show = (b: HTMLButtonElement) => {
+      buttons.forEach((x) => x.setAttribute('aria-pressed', b === x ? 'true' : 'false'));
       panels.forEach((p) => { p.hidden = p.dataset.panel !== b.dataset.day; });
-    }));
+    };
+    buttons.forEach((b) => b.addEventListener('click', () => { picked = true; show(b); }));
 
     const TZ = 'Europe/Madrid';
     const ymd = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(d);
@@ -67,10 +69,13 @@ const cfg = {
 
     // Al nom de cada dia s'hi afegeix el número (p. ex. "Dimarts 17"), perquè quedi clar de quina data són les classes.
     const dayNames = [...buttons].map((b) => b.textContent ?? '');
-    const setDates = (dates: (string | undefined)[]) => buttons.forEach((b, i) => {
-      const day = dates[i];
-      b.textContent = day ? `${dayNames[i]} ${Number(day.slice(8))}` : dayNames[i];
-    });
+    // També s'ordenen per data: el primer botó és sempre el pròxim dia a consultar (no pas dilluns).
+    const setDates = (dates: string[]) => {
+      buttons.forEach((b, i) => { b.textContent = `${dayNames[i]} ${Number(dates[i].slice(8))}`; });
+      const order = [...buttons].map((b, i) => ({ b, d: dates[i], i })).sort((x, y) => x.d.localeCompare(y.d) || x.i - y.i);
+      buttons[0].parentElement!.append(...order.map((o) => o.b));
+      if (!picked) show(order[0].b);
+    };
     // Abans que arribi la resposta de l'API: la data més propera de cada dia de la setmana (avui inclòs).
     const todayIdx = WEEKDAYS.indexOf(wd.format(new Date()));
     const nextDates = WEEKDAYS.map((_, i) => ymd(new Date(Date.now() + ((i - todayIdx + 7) % 7) * 86400000)));
