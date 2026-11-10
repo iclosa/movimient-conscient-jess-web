@@ -46,7 +46,7 @@ img, svg { max-width: 100%; }
 .brand b { display: block; font: 700 19px/22px var(--font-display); }
 .brand small { display: block; font: 600 25px/20px var(--font-script); color: #2BB5AE; } /* el turquesa y la letra de "by Jess" del logo del backend */
 /* Menú: a escriptori, línia d'enllaços; al mòbil, botó + panell a pantalla completa */
-.menu > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-3); min-height: 44px; font-weight: 600; padding: 0 var(--space-4) 0 var(--space-3); border: 2px solid var(--line); border-radius: var(--radius-pill); background: var(--surface-200); color: var(--ink); user-select: none; -webkit-tap-highlight-color: transparent; }
+.menu > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-3); min-height: 44px; font-weight: 400; padding: 0 var(--space-4) 0 var(--space-3); border: 2px solid var(--line); border-radius: var(--radius-pill); background: var(--surface-200); color: var(--ink); user-select: none; -webkit-tap-highlight-color: transparent; }
 .menu > summary::-webkit-details-marker { display: none; }
 .menu > summary::before { content: ''; width: 20px; height: 20px; background: linear-gradient(currentColor, currentColor) 50% 5px / 18px 2px no-repeat, linear-gradient(currentColor, currentColor) 50% 9px / 18px 2px no-repeat, linear-gradient(currentColor, currentColor) 50% 13px / 12px 2px no-repeat; transition: transform 200ms ease; }
 .menu[open] > summary { background: var(--violeta); border-color: var(--violeta); color: var(--on-violeta); }
@@ -56,21 +56,25 @@ img, svg { max-width: 100%; }
 .nav a { color: var(--ink); text-decoration: none; font-weight: 600; padding: var(--space-1) 0; }
 .nav a:hover { color: var(--violeta); }
 .nav a[aria-current='page'] { color: var(--violeta); box-shadow: inset 0 -3px 0 var(--turquesa); }
-.nav .lang { border: 2px solid var(--line); border-radius: var(--radius-pill); padding: 2px var(--space-3); font-size: 13px; }
+.nav .langs { display: inline-flex; padding: 3px; gap: 2px; border: 2px solid var(--line); border-radius: var(--radius-pill); background: var(--surface-200); font-size: 13px; line-height: 1; }
+.nav .langs > * { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; padding: 7px var(--space-3); border-radius: var(--radius-pill); font-weight: 600; letter-spacing: .04em; box-shadow: none; }
+.nav .langs .cur { background: var(--violeta); color: var(--on-violeta); }
+.nav .langs a:hover { background: var(--surface-300); color: var(--ink); }
 .nav .menu-cta { display: none; }
 @media (min-width: 1000px) { .menu > summary { display: none; } .nav { padding: 0; } }
 @media (max-width: 999px) {
   .header .wrap { flex-wrap: nowrap; }
   html.menu-open { overflow: hidden; }
   .menu .nav { position: fixed; inset: var(--header-h, 68px) 0 0 0; z-index: 9; display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 0; padding: var(--space-4) var(--space-5) calc(var(--space-6) + env(safe-area-inset-bottom)); overflow-y: auto; overscroll-behavior: contain; background: radial-gradient(circle at 100% 100%, var(--act-nidra-soft) 0 130px, transparent 131px), radial-gradient(circle at 0% 100%, var(--act-vinyasa-soft) 0 70px, transparent 71px), var(--surface-100); animation: menu-in 220ms ease-out both; }
-  .menu .nav > a:not(.lang):not(.menu-cta) { display: flex; align-items: center; justify-content: space-between; min-height: 56px; padding: var(--space-2) 0; font: 600 26px/1.2 var(--font-display); border-bottom: 1px solid var(--line); box-shadow: none; animation: menu-link 320ms ease-out both; }
-  .menu .nav > a:not(.lang):not(.menu-cta)::after { content: ''; width: 10px; height: 10px; border: solid var(--line); border-width: 0 2px 2px 0; transform: rotate(-45deg); flex: none; }
-  .menu .nav a[aria-current='page'] { color: var(--violeta); }
+  .menu .nav > a:not(.menu-cta) { display: flex; align-items: center; justify-content: space-between; min-height: 52px; padding: var(--space-2) 0; font: 500 19px/1.3 var(--font-display); border-bottom: 1px solid var(--line); box-shadow: none; animation: menu-link 320ms ease-out both; }
+  .menu .nav > a:not(.menu-cta)::after { content: ''; width: 10px; height: 10px; border: solid var(--line); border-width: 0 2px 2px 0; transform: rotate(-45deg); flex: none; }
+  .menu .nav a[aria-current='page'] { color: var(--violeta); font-weight: 600; }
   .menu .nav a[aria-current='page']::after { border-color: var(--turquesa); }
   .menu .nav > a:nth-child(2) { animation-delay: 30ms; } .menu .nav > a:nth-child(3) { animation-delay: 60ms; } .menu .nav > a:nth-child(4) { animation-delay: 90ms; } .menu .nav > a:nth-child(5) { animation-delay: 120ms; } .menu .nav > a:nth-child(6) { animation-delay: 150ms; } .menu .nav > a:nth-child(n+7) { animation-delay: 180ms; }
   .menu .nav .menu-cta { display: inline-flex; margin-top: var(--space-5); color: var(--on-violeta); }
   .menu .nav .menu-cta:hover { color: var(--on-turquesa); }
-  .menu .nav .lang { align-self: flex-start; order: 2; margin-top: var(--space-5); min-height: 44px; display: inline-flex; align-items: center; padding: 0 var(--space-4); font-size: 15px; }
+  .menu .nav .langs { align-self: flex-start; order: 2; margin-top: var(--space-5); font-size: 14px; }
+  .menu .nav .langs > * { min-width: 48px; padding: 11px var(--space-4); }
   .menu .nav .menu-cta { order: 3; }
 }
 @keyframes menu-in { from { opacity: 0; } to { opacity: 1; } }

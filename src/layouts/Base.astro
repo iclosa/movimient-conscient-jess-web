@@ -64,7 +64,11 @@ const graph = [businessLd(origin, lang), websiteLd(origin, lang), ...jsonLd];
           <summary>{t.menu}</summary>
           <nav class="nav" aria-label="Principal">
             {keys.map((k) => <a href={sectionPath(lang, k)} aria-current={k === section ? 'page' : undefined}>{t.nav[k]}</a>)}
-            <a class="lang" href={alt[other]} hreflang={other} lang={other} title={ui[other].langName}>{other.toUpperCase()}</a>
+            <span class="langs" role="group" aria-label="Idioma">
+              {(['ca', 'es'] as const).map((l) => l === lang
+                ? <span class="cur" lang={l} aria-current="true">{l.toUpperCase()}</span>
+                : <a href={alt[l]} hreflang={l} lang={l} title={ui[l].langName}>{l.toUpperCase()}</a>)}
+            </span>
             <a class="btn menu-cta" href={sectionPath(lang, 'app')}>{t.cta.book}</a>
           </nav>
         </details>
