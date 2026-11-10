@@ -65,6 +65,17 @@ const cfg = {
     const wd = new Intl.DateTimeFormat('en-US', { weekday: 'short', timeZone: TZ });
     const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+    // Al nom de cada dia s'hi afegeix el número (p. ex. "Dimarts 17"), perquè quedi clar de quina data són les classes.
+    const dayNames = [...buttons].map((b) => b.textContent ?? '');
+    const setDates = (dates: (string | undefined)[]) => buttons.forEach((b, i) => {
+      const day = dates[i];
+      b.textContent = day ? `${dayNames[i]} ${Number(day.slice(8))}` : dayNames[i];
+    });
+    // Abans que arribi la resposta de l'API: la data més propera de cada dia de la setmana (avui inclòs).
+    const todayIdx = WEEKDAYS.indexOf(wd.format(new Date()));
+    const nextDates = WEEKDAYS.map((_, i) => ymd(new Date(Date.now() + ((i - todayIdx + 7) % 7) * 86400000)));
+    setDates(nextDates);
+
     // Se construye con textContent (nunca innerHTML) porque los textos vienen de la API.
     const el = (tag: string, cls?: string, text?: string) => {
       const n = document.createElement(tag);
@@ -132,6 +143,7 @@ const cfg = {
           if (day === dateOf[i]) byDay[i].push(slot(sess, d));
         }
         panels.forEach((p) => fill(p, byDay[Number(p.dataset.panel)]));
+        setDates(nextDates.map((d, i) => dateOf[i] ?? d));
       } catch {
         panels.forEach((p) => fill(p, [], cfg.strings.error));
       }
