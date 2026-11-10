@@ -111,16 +111,25 @@ const cfg = {
 
     async function load() {
       const now = new Date();
-      const to = new Date(now.getTime() + 6 * 86400000);
+      // 7 dies enllà (i no 6): així el dia de la setmana d'avui també mostra les classes de la setmana vinent quan les d'avui ja han passat.
+      const to = new Date(now.getTime() + 7 * 86400000);
       try {
         const res = await fetch(`${cfg.api}/sessions?from=${ymd(now)}&to=${ymd(to)}`, { headers: { Accept: 'application/json' } });
         if (!res.ok) throw new Error(String(res.status));
         const sessions: Session[] = (await res.json()).data;
         const byDay: HTMLElement[][] = [[], [], [], [], [], [], []];
+        // Cada dia de la setmana mostra només la seva data més propera amb classes (així no se'n barregen dues).
+        const dateOf: (string | undefined)[] = [];
         for (const sess of sessions) {
           const d = new Date(sess.starts_at);
           if (d.getTime() < now.getTime() || sess.state === 'cancelled') continue;
-          byDay[WEEKDAYS.indexOf(wd.format(d))].push(slot(sess, d));
+          const i = WEEKDAYS.indexOf(wd.format(d));
+          const day = ymd(d);
+          if (dateOf[i] === undefined || day < dateOf[i]!) {
+            dateOf[i] = day;
+            byDay[i] = [];
+          }
+          if (day === dateOf[i]) byDay[i].push(slot(sess, d));
         }
         panels.forEach((p) => fill(p, byDay[Number(p.dataset.panel)]));
       } catch {
