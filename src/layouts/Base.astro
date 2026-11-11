@@ -18,14 +18,19 @@ interface Props {
   jsonLd?: object[];
   ogType?: 'website' | 'article';
   noindex?: boolean;
+  image?: string; // imagen para compartir (ruta o URL absoluta); por defecto, la de la marca
 }
-const { lang, title, description, section, alt, jsonLd = [], ogType = 'website', noindex = false } = Astro.props;
+const { lang, title, description, section, alt, jsonLd = [], ogType = 'website', noindex = false, image } = Astro.props;
 const t = ui[lang];
 const origin = Astro.site!.origin;
 const canonical = new URL(alt[lang], origin).href;
 // La marca solo se añade si el título resultante cabe en ~60 caracteres (Google trunca a partir de ahí).
 const withBrand = `${title} | ${t.siteName}`;
 const fullTitle = title.includes('Moviment Conscient') || withBrand.length > 60 ? title : withBrand;
+// Imagen al compartir (WhatsApp, Telegram, redes): 1200×630, URL absoluta. WhatsApp no admite SVG.
+const custom = !!image;
+const ogImage = new URL(image ?? `/og-${lang}.png`, origin).href;
+const ogAlt = `${site.name} · ${lang === 'ca' ? 'Centre de ioga i moviment a Vallirana' : 'Centro de yoga y movimiento en Vallirana'}`;
 const other = otherLang(lang);
 const keys = ['home', 'activities', 'events', 'schedule', 'videos', 'app', 'blog', 'about', 'contact'] as const;
 const graph = [businessLd(origin, lang), websiteLd(origin, lang), ...jsonLd];
@@ -52,7 +57,16 @@ const graph = [businessLd(origin, lang), websiteLd(origin, lang), ...jsonLd];
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content={lang === 'ca' ? 'ca_ES' : 'es_ES'} />
     <meta property="og:locale:alternate" content={lang === 'ca' ? 'es_ES' : 'ca_ES'} />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:secure_url" content={ogImage} />
+    {!custom && <meta property="og:image:type" content="image/png" />}
+    {!custom && <meta property="og:image:width" content="1200" />}
+    {!custom && <meta property="og:image:height" content="630" />}
+    <meta property="og:image:alt" content={ogAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
     {graph.map((g) => <script type="application/ld+json" set:html={JSON.stringify(g)} />)}
   </head>
   <body>
